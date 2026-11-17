@@ -1435,3 +1435,6 @@ p { margin: 0; }
 @media (max-width: 1180px) { .hdr-actions { margin-inline-start: auto; } }
 .hdr.is-menu .hdr-lang { color: var(--green); border-color: var(--line); }
 body.no-scroll .wa-float, body.no-scroll .totop, body.no-scroll .to-top { opacity: 0; pointer-events: none; }
+/* أيقونات السوشيال جنب بعض في كل مكان */
+.socials, .ftr ul.socials, .mnav ul.socials { display: flex !important; flex-direction: row; flex-wrap: wrap; gap: 10px; align-items: center; }
+.ftr ul.socials a { font-size: 0; }

@@ -44,6 +44,11 @@ export const useContent = () => useContext(ContentCtx).data
 export const useBlock = (key) => useContext(ContentCtx).data.blocks[key] || {}
 export const useReady = () => useContext(ContentCtx).ready
 
+// رقم الهاتف: أرقام بس (بيحوّل الأرقام العربي ٠١٢ لإنجليزي) ويسمح بـ + في الأول
+export const cleanPhone = (v) => String(v || '').replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/(?!^\+)[^\d]/g, '').slice(0, 16)
+export const validPhone = (v) => { const d = cleanPhone(v).replace(/\D/g, ''); return d.length >= 8 && d.length <= 15 }
+export const phoneInput = { type: 'tel', inputMode: 'tel', dir: 'ltr', maxLength: 16, pattern: '\\+?[0-9]{8,15}', onInput: (e) => { const c = cleanPhone(e.target.value); if (c !== e.target.value) e.target.value = c } }
+
 export async function sendMessage(payload) {
   if (!supabase) throw new Error('not-configured')
   const { error } = await supabase.from('messages').insert({ ...payload, is_read: false })

@@ -338,6 +338,7 @@ function TableManager({ name, toast }) {
         <input placeholder="بحث…" value={q} onChange={(e) => setQ(e.target.value)} />
         {cfg.filter && <select value={cat} onChange={(e) => setCat(e.target.value)}><option value="">كل التصنيفات</option>{cfg.fields.find((f) => f.k === cfg.filter).options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>}
       </div>
+      {err && <p className="ad-err">مش قادر يجيب الرسائل: <bdi dir="ltr">{err}</bdi> — اتأكدي إنك شغّلتي schema.sql وإن حسابك أدمن.</p>}
       {!rows ? <div className="ad-loading" /> : !view.length ? <p className="ad-empty">لا يوجد عناصر — الموقع بيعرض المحتوى الافتراضي لحد ما تضيف.</p> : (
         <ul className="ad-list">
           {view.map((r, i) => (
@@ -361,8 +362,17 @@ function TableManager({ name, toast }) {
 /* ═══════════ الرسائل ═══════════ */
 function Inbox({ toast, onCount }) {
   const [rows, setRows] = useState(null); const [src, setSrc] = useState(''); const [open, setOpen] = useState(null)
-  const load = () => supabase.from('messages').select('*').order('created_at', { ascending: false }).limit(500).then(({ data }) => { setRows(data || []); onCount((data || []).filter((m) => !m.is_read).length) })
-  useEffect(() => { load() }, [])
+  const [err, setErr] = useState('')
+  const load = () => supabase.from('messages').select('*').order('created_at', { ascending: false }).limit(500).then(({ data, error }) => {
+    if (error) { console.error('[Riqueza] تحميل الرسائل:', error); setErr(error.message); setRows([]); return }
+    setErr(''); setRows(data || []); onCount((data || []).filter((m) => !m.is_read).length)
+  })
+  useEffect(() => {
+    load()
+    const on = () => document.visibilityState === 'visible' && load()
+    document.addEventListener('visibilitychange', on); const t = setInterval(load, 60000)
+    return () => { document.removeEventListener('visibilitychange', on); clearInterval(t) }
+  }, [])
   const read = async (m) => { setOpen(open === m.id ? null : m.id); if (!m.is_read) { await supabase.from('messages').update({ is_read: true }).eq('id', m.id); load() } }
   const del = async (m) => { if (!confirm('حذف الرسالة؟')) return; await supabase.from('messages').delete().eq('id', m.id); toast('تم الحذف'); load() }
   const kind = (m) => String(m.source || 'contact').split(':')[0]
@@ -376,12 +386,13 @@ function Inbox({ toast, onCount }) {
     <section className="ad-panel">
       <header className="ad-head">
         <div><h2>الرسائل والطلبات</h2><p>كل اللي بيتبعت من فورم التواصل، الاستشارة، البوب أب والتوظيف.</p></div>
-        <div className="ad-head-actions"><button className="ad-btn ghost" onClick={csv}>تصدير Excel (CSV)</button></div>
+        <div className="ad-head-actions"><button className="ad-btn ghost" onClick={() => { setRows(null); load() }}>تحديث ↻</button><button className="ad-btn ghost" onClick={csv}>تصدير Excel (CSV)</button></div>
       </header>
       <div className="ad-tools ad-chips">
         <button className={!src ? 'on' : ''} onClick={() => setSrc('')}>الكل ({rows?.length || 0})</button>
         {Object.entries(SOURCES).map(([k, l]) => <button key={k} className={src === k ? 'on' : ''} onClick={() => setSrc(k)}>{l} ({(rows || []).filter((m) => kind(m) === k).length})</button>)}
       </div>
+      {err && <p className="ad-err">مش قادر يجيب الرسائل: <bdi dir="ltr">{err}</bdi> — اتأكدي إنك شغّلتي schema.sql وإن حسابك أدمن.</p>}
       {!rows ? <div className="ad-loading" /> : !view.length ? <p className="ad-empty">لا توجد رسائل.</p> : (
         <ul className="ad-msgs">
           {view.map((m) => (

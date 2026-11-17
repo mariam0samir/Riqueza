@@ -151,3 +151,4 @@
 .ad-imgs details summary { cursor: pointer; color: #7a8580; font-size: 13px; }
 .ad-imgs details textarea { margin-top: 8px; width: 100%; }
 @media (max-width: 600px) { .ad-sec { grid-template-columns: 26px 1fr auto 30px 30px; gap: 6px; padding: 8px; } }
+.ad-panel > .ad-err { background: #fdecec; border: 1px solid #f3c2c3; border-radius: 12px; padding: 12px 16px; margin: 0 0 14px; }

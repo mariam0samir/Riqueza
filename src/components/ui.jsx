@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useLang } from '../lib/i18n'
-import { useBlock, useContent, sendMessage } from '../lib/content'
+import { useBlock, useContent, sendMessage, phoneInput, validPhone, cleanPhone } from '../lib/content'
 
 /* ───────── أيقونات ───────── */
 const P = {
@@ -228,13 +228,15 @@ export function ContactForm({ source = 'contact', compact = false, defaultServic
     const f = e.currentTarget
     const v = Object.fromEntries(new FormData(f).entries())
     if (!v.name?.trim() || !v.phone?.trim()) { setState({ busy: false, note: u.required, ok: false }); return }
+    if (!validPhone(v.phone)) { setState({ busy: false, note: u.badPhone, ok: false }); return }
     setState({ busy: true, note: '', ok: false })
     try {
-      await sendMessage({ source, name: v.name.trim(), phone: v.phone.trim(), email: v.email || null, company: v.company || null, subject: v.service || null, body: v.message || null })
+      await sendMessage({ source, name: v.name.trim(), phone: cleanPhone(v.phone), email: v.email || null, company: v.company || null, subject: v.service || null, body: v.message || null })
       f.reset()
       setState({ busy: false, note: u.sent, ok: true })
       onDone?.()
-    } catch {
+    } catch (err) {
+      console.error('[Riqueza] إرسال الرسالة فشل:', err?.message || err, err)
       setState({ busy: false, note: u.failed, ok: false })
     }
   }
@@ -242,7 +244,7 @@ export function ContactForm({ source = 'contact', compact = false, defaultServic
     <form className={`cform ${compact ? 'is-compact' : ''}`} onSubmit={submit} noValidate>
       <div className="cform-grid">
         <label><span>{u.name} *</span><input name="name" autoComplete="name" required /></label>
-        <label><span>{u.phone} *</span><input name="phone" type="tel" autoComplete="tel" dir="ltr" required /></label>
+        <label><span>{u.phone} *</span><input name="phone" {...phoneInput} autoComplete="tel" placeholder="01xxxxxxxxx" required /></label>
         {!compact && <label><span>{u.email}</span><input name="email" type="email" autoComplete="email" dir="ltr" /></label>}
         {!compact && <label><span>{u.company}</span><input name="company" autoComplete="organization" /></label>}
         <label className="span2"><span>{u.service}</span>

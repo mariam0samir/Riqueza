@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { useLang } from '../lib/i18n'
-import { useBlock, useContent, useReady, sendMessage } from '../lib/content'
+import { useBlock, useContent, useReady, sendMessage, phoneInput, validPhone, cleanPhone } from '../lib/content'
 import { lines, pairs, cards, rows, paragraphs, pad2 } from '../lib/parse'
 import { Icon, PageHero, SectionHead, Accordion, ContactForm, Slider, useConsult, WhatsAppIcon } from '../components/ui'
 import { Stats, Chairman, Why, CtaBand, InsightsSlider, HScroll } from '../home/Home'
@@ -508,11 +508,12 @@ export function Careers() {
     const f = e.currentTarget
     const v = Object.fromEntries(new FormData(f).entries())
     if (!v.name?.trim() || !v.phone?.trim()) { setState({ busy: false, note: u.required, ok: false }); return }
+    if (!validPhone(v.phone)) { setState({ busy: false, note: u.badPhone, ok: false }); return }
     setState({ busy: true, note: '', ok: false })
     try {
-      await sendMessage({ source: 'careers', name: v.name.trim(), phone: v.phone.trim(), email: v.email || null, subject: v.position || null, link: v.link || null, body: v.message || null })
+      await sendMessage({ source: 'careers', name: v.name.trim(), phone: cleanPhone(v.phone), email: v.email || null, subject: v.position || null, link: v.link || null, body: v.message || null })
       f.reset(); setState({ busy: false, note: u.sent, ok: true })
-    } catch { setState({ busy: false, note: u.failed, ok: false }) }
+    } catch (err) { console.error('[Riqueza] إرسال الرسالة فشل:', err?.message || err, err); setState({ busy: false, note: u.failed, ok: false }) }
   }
   return (
     <>
@@ -531,7 +532,7 @@ export function Careers() {
           <form className="cform" onSubmit={submit} noValidate data-reveal>
             <div className="cform-grid">
               <label><span>{u.name} *</span><input name="name" required /></label>
-              <label><span>{u.phone} *</span><input name="phone" type="tel" dir="ltr" required /></label>
+              <label><span>{u.phone} *</span><input name="phone" {...phoneInput} autoComplete="tel" placeholder="01xxxxxxxxx" required /></label>
               <label><span>{u.email}</span><input name="email" type="email" dir="ltr" /></label>
               <label><span>{u.position}</span>{jobs.length ? <select name="position"><option value="">—</option>{jobs.map((j) => <option key={j.id}>{tx(j, 'title')}</option>)}</select> : <input name="position" />}</label>
               <label className="span2"><span>{u.cvLink}</span><input name="link" type="url" dir="ltr" placeholder="https://" /></label>
