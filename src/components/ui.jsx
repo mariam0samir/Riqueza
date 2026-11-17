@@ -319,10 +319,17 @@ export function ConsultProvider({ children }) {
 export function WhatsAppFloat() {
   const c = useBlock('contact')
   const { u } = useLang()
+  const { pathname } = useLocation()
+  const [top, setTop] = useState(true)
+  useEffect(() => {
+    const on = () => setTop(window.scrollY < window.innerHeight * 0.6)
+    on(); addEventListener('scroll', on, { passive: true })
+    return () => removeEventListener('scroll', on)
+  }, [pathname])
   if (!c.whatsapp) return null
   const num = String(c.whatsapp).replace(/\D/g, '')
   return (
-    <a className="wa-float" href={`https://wa.me/${num}`} target="_blank" rel="noreferrer" aria-label={u.whatsapp}>
+    <a className={`wa-float ${top && pathname === '/' ? 'at-top' : ''}`} href={`https://wa.me/${num}`} target="_blank" rel="noreferrer" aria-label={u.whatsapp}>
       <WhatsAppIcon /><span>{u.whatsapp}</span>
     </a>
   )

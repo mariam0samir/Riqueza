@@ -1403,3 +1403,35 @@ p { margin: 0; }
 @media (max-width: 960px) { .fc-sec-in { grid-template-columns: 1fr; } }
 .ftr-logo { display: inline-block; }
 @media (max-width: 900px) { .finder-art::before { inset: 20px -8px 12px 20px; } }
+
+/* إصلاح الهيرو على الموبايل والتابلت */
+.hero2-in > *, .hero2-copy, .hero-foot { min-width: 0; }
+.hero-sub { overflow-wrap: anywhere; }
+.hdr-logo { border-radius: 12px; }
+.hdr-logo:focus { outline: none; }
+.hdr-logo:focus-visible { outline: 2px solid var(--lime); outline-offset: 4px; }
+.wa-float { transition: padding .35s var(--ease), opacity .35s, transform .35s var(--ease); }
+@media (max-width: 960px) {
+  .wa-float.at-top { opacity: 0; transform: translateY(20px) scale(.8); pointer-events: none; }
+  .hero2-in { gap: 22px; padding-bottom: 24px; }
+  .hero2 .hero-foot { padding-top: 22px; }
+  .hero2-stats { gap: 8px; }
+  .glass { min-height: 96px; padding: 12px 12px 10px; display: flex; flex-direction: column; justify-content: space-between; }
+  .glass b { font-size: 26px; }
+  .hero-sub { font-size: 13.5px; line-height: 1.7; }
+}
+@media (max-width: 640px) {
+  .hero2 .hero-title { font-size: clamp(34px, 9vw, 44px); }
+  .hero2-btns { margin-top: 22px; gap: 10px; }
+  .hero2-btns > * { flex: 1 1 auto; justify-content: center; }
+  .glass { min-height: 84px; }
+  .glass b { font-size: 22px; }
+}
+@media (max-width: 960px) {
+  .hero2 .hero-shade, [dir="rtl"] .hero2 .hero-shade { background: linear-gradient(180deg, rgba(8, 30, 20, .45) 0%, rgba(8, 30, 20, .2) 35%, rgba(8, 30, 20, .35) 60%, rgba(8, 30, 20, .7) 100%) !important; }
+  .hero2 .hero-title, .hero-sub, .hero-count { text-shadow: 0 2px 14px rgba(0, 0, 0, .45); }
+}
+/* الهيدر: لما المنيو تستخبى الأزرار تروح للطرف التاني */
+@media (max-width: 1180px) { .hdr-actions { margin-inline-start: auto; } }
+.hdr.is-menu .hdr-lang { color: var(--green); border-color: var(--line); }
+body.no-scroll .wa-float, body.no-scroll .totop, body.no-scroll .to-top { opacity: 0; pointer-events: none; }
